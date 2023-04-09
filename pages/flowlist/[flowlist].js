@@ -3,9 +3,11 @@ import { ReactFl } from "@/components/ReactFl";
 // import RFlow from "@/components/RFlow";
 import { SingleModule } from '@/components/SingleModule';
 import Link from 'next/link';
-import { DataContext } from './_app';
+import { DataContext } from '../_app';
 
-const flowlist = ({ data }) => {
+const flowlist = ({ data, listData }) => {
+
+	// const params = useParams
 
 	const moduleData = useContext(DataContext)
 	console.log(moduleData)
@@ -13,7 +15,7 @@ const flowlist = ({ data }) => {
 		<>
 			<div className='bg-green-100'>
 				<ul className='flex py-2 px-2'>
-					<li className='my-2 mx-4 text-xl italic font-bold'> <Link href="/">Workflow name: {moduleData.name}</Link> </li>
+					<li className='my-2 mx-4 text-xl italic font-bold'> <Link href="/">Workflow name: {listData.name}</Link> </li>
 				</ul>
 			</div>
 			<div className='flex justify-between'>
@@ -38,15 +40,22 @@ const flowlist = ({ data }) => {
 
 export default flowlist
 
-export async function getServerSideProps() {
-	const response = await fetch('https://64307b10d4518cfb0e50e555.mockapi.io/modules?page=1&limit=5');
-	const data = await response.json();
+export async function getServerSideProps({ query }) {
+
+	const module = await fetch('https://64307b10d4518cfb0e50e555.mockapi.io/modules?page=1&limit=5');
+	const data = await module.json();
+
+	// console.log(query.flowlist)
+
+	const list = await fetch(`https://64307b10d4518cfb0e50e555.mockapi.io/workflow/${query.flowlist}`);
+	const listData = await list.json();
 
 	// console.log(data)
 
 	return {
 		props: {
 			data,
+			listData
 		},
 	};
 }

@@ -35,3 +35,6 @@ yarn-error.log*
 RFlow.js
 CustomNode.js
 Check.js
+
+Home.module.css
+/public
