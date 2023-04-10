@@ -20,7 +20,7 @@ const Pagination = ({ page, pageCount }) => {
 	}
 
 	return (
-		<div className='flex justify-between mx-auto '>
+		<div className='flex justify-between mx-auto'>
 			<button onClick={() => handlePaginate(-1)} className={`rounded  w-24 font-bold text-white py-1 px-3 mr-4 text-center mb-10 ${isPrevDisabled() ? 'bg-green-200' : 'bg-green-400'}`}>Previous</button>
 			<button onClick={() => handlePaginate(1)} className={`rounded  w-24 font-bold text-white py-1 px-3 mr-4 text-center mb-10 ${isNextDisabled() ? 'bg-green-200' : 'bg-green-400'}`}>Next</button>
 		</div>
