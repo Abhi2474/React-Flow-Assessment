@@ -3,11 +3,11 @@ import React from 'react'
 const Pagination = ({ page, pageCount }) => {
 
 	const isNextDisabled = () => {
-		return page >= pageCount
+		return true
 	}
 
 	const isPrevDisabled = () => {
-		return page <= 1
+		return true
 	}
 
 	const handlePaginate = (direction) => {
