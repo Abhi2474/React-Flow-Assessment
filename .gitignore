@@ -33,7 +33,6 @@ yarn-error.log*
 
 *.txt
 RFlow.js
-CustomNode.js
 Check.js
 
 Home.module.css

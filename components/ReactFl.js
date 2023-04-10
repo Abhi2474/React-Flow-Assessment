@@ -1,61 +1,117 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import ReactFlow, {
-	MiniMap,
-	Controls,
-	Background,
+	ReactFlowProvider,
+	addEdge,
 	useNodesState,
 	useEdgesState,
-	addEdge,
+	Controls,
+	Background
 } from 'reactflow';
-
 import 'reactflow/dist/style.css';
-import Check from './Check';
-// import { CustomNode } from './CustomNode';
+
 import { SingleModule } from './SingleModule';
-// import Check from './Check';
+import Pagination from '@/components/Pagination';
+import { CustomNode } from './CustomNode';
+import { CustomModuleNode } from './CustomModuleNode';
 
 
+const initialNodes = [
+	{
+		id: '1',
+		type: 'userNode',
+		data: { label: 'input node' },
+		position: { x: 25, y: -300 },
+	},
+];
 
-export const ReactFl = (props) => {
-	// const { data } = props
+const initialEdges = [
+	{ id: 'e1-2', source: '2', target: '1' }
+];
 
-	// console.log(data[0])
-	// const { name } = data[0]
+let id = 0;
+const getId = () => `dndnode_${id++}`;
 
-	const initialNodes = [
-		{ id: '1', type: 'input', position: { x: 200, y: 60 }, data: { label: 'name' } },
-		{ id: '2', position: { x: 100, y: 220 }, data: { label: '2' } },
-		{ id: '3', position: { x: 400, y: 250 }, data: { label: '3' } },
-		{ id: '4', type: 'output', position: { x: 500, y: 320 }, data: { label: '4' } },
-	];
-	const initialEdges = [
-		{ id: 'e1-2', source: '1', target: '2' },
-		{ id: '2', source: '1', target: '3' },
-		{ id: '3', source: '3', target: '4' }
-	];
+const ReactFl = (props) => {
 
+	const { data } = props
+
+	const reactFlowWrapper = useRef(null);
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+	const [reactFlowInstance, setReactFlowInstance] = useState(null);
 
-	const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+	const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
-	// const nodeTypes = useMemo(() => ({ textUpdater: SingleModule }), []);
-	// const nodeTypes = useMemo(() => ({ textUpdater: Check }), []);
+	const onDragOver = useCallback((event) => {
+		event.preventDefault();
+		event.dataTransfer.dropEffect = 'move';
+	}, []);
+
+	const onDrop = useCallback(
+		(event) => {
+			event.preventDefault();
+
+			const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
+			const type = event.dataTransfer.getData('application/reactflow');
+
+			// check if the dropped element is valid
+			if (typeof type === 'undefined' || !type) {
+				return;
+			}
+
+			const position = reactFlowInstance.project({
+				x: event.clientX - reactFlowBounds.left,
+				y: event.clientY - reactFlowBounds.top,
+			});
+			const newNode = {
+				id: getId(),
+				type: 'moduleNode',
+				position,
+				data: { label: `${type} node` },
+			};
+
+			setNodes((nds) => nds.concat(newNode));
+		},
+		[reactFlowInstance]
+	);
+
+	const nodeTypes = useMemo(() => ({ userNode: CustomModuleNode, moduleNode: CustomNode }), []);
 
 	return (
-		<div style={{ width: '66vw', height: '100vh' }}>
-			<ReactFlow
-				nodes={nodes}
-				edges={edges}
-				onNodesChange={onNodesChange}
-				onEdgesChange={onEdgesChange}
-				onConnect={onConnect}
-			// nodeTypes={nodeTypes}
-			>
-				<Controls />
-				<MiniMap />
-				<Background variant="dots" gap={12} size={1} />
-			</ReactFlow>
+		<div className="flex h-screen flex-grow">
+			<ReactFlowProvider>
+				<div className='w-96 border flex justify-between flex-col'>
+					<div className='border h-16 text-xl pl-6 pt-4'>Modules</div>
+					<div className='h-screen pt-4'>
+						{
+							data.map((item) => <SingleModule key={item.id} item={item} />)
+						}
+
+					</div>
+					<Pagination />
+				</div>
+				<div className="h-screen flex-grow" ref={reactFlowWrapper}>
+					<ReactFlow
+						nodes={nodes}
+						edges={edges}
+						onNodesChange={onNodesChange}
+						onEdgesChange={onEdgesChange}
+						onConnect={onConnect}
+						onInit={setReactFlowInstance}
+						onDrop={onDrop}
+						onDragOver={onDragOver}
+						fitView
+						nodeTypes={nodeTypes}
+					>
+						<Controls />
+						<Background variant='dots' gap={8} size={1} />
+					</ReactFlow>
+				</div>
+			</ReactFlowProvider>
 		</div>
 	);
-}
+};
+
+export default ReactFl;
+
+
